@@ -37,7 +37,7 @@ RUN /steamcmd/steamcmd.sh \
       +app_update 896660 validate \
       +quit
 
-# Install x86_64 emulation + dependencies
+# Install dependencies (replace the existing RUN command)
 RUN dpkg --add-architecture i386 && \
     apt-get update && \
     apt-get install -y \
@@ -51,7 +51,9 @@ RUN dpkg --add-architecture i386 && \
       git \
       cmake \
       python3 \
-      python3-pip  # Add this line
+      python3-pip \
+      python-is-python3 && \  # Critical for CMake to find Python
+    rm -rf /var/lib/apt/lists/*
 
 # Configure runtime
 WORKDIR /valheim-server
