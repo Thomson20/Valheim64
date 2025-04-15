@@ -32,6 +32,9 @@ RUN git clone https://github.com/ptitSeb/box64 && \
     cd / && \
     rm -rf /box64
 
+# Add this right after Box64 installation
+RUN echo 'export BOX64_LD_LIBRARY_PATH=/lib/i386-linux-gnu:/usr/lib/i386-linux-gnu' >> /etc/bash.bashrc
+
 # Install SteamCMD
 RUN mkdir -p /steamcmd && \
     cd /steamcmd && \
@@ -39,8 +42,8 @@ RUN mkdir -p /steamcmd && \
     tar -xvzf steamcmd_linux.tar.gz && \
     rm steamcmd_linux.tar.gz
 
-# Install Valheim
-RUN /steamcmd/steamcmd.sh \
+# Replace the "Install Valheim" section with:
+RUN box64 /steamcmd/steamcmd.sh \
       +login anonymous \
       +force_install_dir /valheim-server \
       +app_update 896660 validate \
