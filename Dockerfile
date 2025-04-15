@@ -13,6 +13,9 @@ RUN dpkg --add-architecture i386 && \
       tar \
       git \
       cmake
+      
+RUN python3 --version && \
+    update-alternatives --install /usr/bin/python python /usr/bin/python3 10
 
 # Install Box64 (for x86_64 emulation)
 RUN git clone https://github.com/ptitSeb/box64 && \
