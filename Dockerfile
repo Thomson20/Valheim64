@@ -1,6 +1,6 @@
 FROM debian:12.4-slim
 
-# Install x86_64 emulation + dependencies
+# Install dependencies
 RUN dpkg --add-architecture i386 && \
     apt-get update && \
     apt-get install -y \
@@ -18,11 +18,7 @@ RUN dpkg --add-architecture i386 && \
       python-is-python3 && \
     rm -rf /var/lib/apt/lists/*
 
-# Verify Python installation
-RUN python3 --version && \
-    update-alternatives --install /usr/bin/python python /usr/bin/python3 10
-
-# Install Box64 (for x86_64 emulation)
+# Install Box64
 RUN git clone https://github.com/ptitSeb/box64 && \
     cd box64 && \
     mkdir build && cd build && \
@@ -32,17 +28,18 @@ RUN git clone https://github.com/ptitSeb/box64 && \
     cd / && \
     rm -rf /box64
 
-# Add this right after Box64 installation
-RUN echo 'export BOX64_LD_LIBRARY_PATH=/lib/i386-linux-gnu:/usr/lib/i386-linux-gnu' >> /etc/bash.bashrc
+# Configure Box64 environment
+ENV BOX64_LD_LIBRARY_PATH=/lib/i386-linux-gnu:/usr/lib/i386-linux-gnu
+ENV BOX64_PATH=/usr/local/bin
 
-# Install SteamCMD
-RUN mkdir -p /steamcmd && \
-    cd /steamcmd && \
+# Install SteamCMD with Box64 emulation
+RUN mkdir -p /steamcmd && cd /steamcmd && \
     wget https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz && \
     tar -xvzf steamcmd_linux.tar.gz && \
-    rm steamcmd_linux.tar.gz
+    rm steamcmd_linux.tar.gz && \
+    box64 /steamcmd/steamcmd.sh +quit
 
-# Replace the "Install Valheim" section with:
+# Install Valheim server
 RUN box64 /steamcmd/steamcmd.sh \
       +login anonymous \
       +force_install_dir /valheim-server \
@@ -51,9 +48,6 @@ RUN box64 /steamcmd/steamcmd.sh \
 
 # Configure runtime
 WORKDIR /valheim-server
-ENV LD_LIBRARY_PATH="/lib/i386-linux-gnu:/usr/lib/i386-linux-gnu"
-
-# Copy launch script
 COPY run.sh /run.sh
 RUN chmod +x /run.sh
 
